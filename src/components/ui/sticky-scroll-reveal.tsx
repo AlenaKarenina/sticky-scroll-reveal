@@ -55,14 +55,14 @@ export const StickyScroll = ({
       //ref={elementRef}
     >
       <div className="div relative flex items-start px-4">
-        <div className="max-w-2xl" style={{ paddingBottom: '160px' }}>
+        <div className="max-w-2xl" style={{ paddingBottom: '240px', paddingTop: '240px' }}>
           {content.map(({ title, description }, index) => (
-            <div key={title + index} className="my-20" style={{ minHeight: '100vh' }}>
+            <div key={title + index} className="my-20" style={{ minHeight: '50vh' }}>
               <motion.h2
                 initial={{
                   opacity: 0,
                 }}
-                whileInView={{
+                animate={{
                   opacity: activeCard === index ? 1 : 0.1,
                 }}
                 className="text-2xl font-bold text-slate-100"
@@ -73,7 +73,7 @@ export const StickyScroll = ({
                 initial={{
                   opacity: 0,
                 }}
-                whileInView={{
+                animate={{
                   opacity: activeCard === index ? 1 : 0.1,
                 }}
                 className="text-kg text-slate-300 max-w-sm mt-10"
@@ -85,10 +85,14 @@ export const StickyScroll = ({
         </div>
       </div>
       <motion.div
-        whileInView={{
+        animate={{
           background: linearGradients[activeCard % linearGradients.length],
         }}
-        className="lg:block h-60 w-80 rounded-md bg-white sticky top-10 overflow-hidden"
+        className="lg:block h-60 w-80 rounded-md bg-white sticky overflow-hidden"
+        style={{
+          top: '50%',
+          transform: 'translateY(-50%)'
+        }}
       ></motion.div>
     </motion.div>
   )
