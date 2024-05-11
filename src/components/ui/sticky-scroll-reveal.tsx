@@ -1,30 +1,25 @@
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { useMotionValueEvent, useScroll, motion } from 'framer-motion'
 import '../../App.css'
 
 export const StickyScroll = ({
-  content,
+  content
 }: {
   content: {
     title: string
     description: string
+    src: string
+    content?: ReactNode
   }[]
 }) => {
 
   const [activeCard, setActiveCard] = useState(0)
 
-  //const elementRef = useRef<never>(null)
-
-  const { scrollYProgress } = useScroll(
-    /*{
-      container: elementRef,
-      offset: ["start start", "end start"],
-    }*/
-  )
+  const { scrollYProgress } = useScroll()
 
   const cardLength = content.length
 
-  useMotionValueEvent(scrollYProgress, 'change', (latest) => {
+  /*useMotionValueEvent(scrollYProgress, 'change', (latest) => {
     const cardsBreakpoints = content.map((_, index) => index / cardLength)
 
     cardsBreakpoints.forEach((breakpoint, index) => {
@@ -32,40 +27,66 @@ export const StickyScroll = ({
         setActiveCard(() => index)
       }
     })
+  })*/
+
+  useMotionValueEvent(scrollYProgress, 'change', (latest) => {
+    const cardsBreakpoints = content.map((_, index) => index / cardLength)
+
+    const closestBreakpointIndex = cardsBreakpoints.reduce(
+      (acc, breakpoint, index) => {
+        const distance = Math.abs(latest - breakpoint)
+        if (distance < Math.abs(latest - cardsBreakpoints[acc])) {
+          return index
+        }
+        return acc
+      },
+      0
+    )
+    setActiveCard(closestBreakpointIndex)
   })
-
-  const backgroundColors = [
-    "var(--slate-900)",
-    "var(--black)",
-    "var(--neutral-900)",
-  ]
-
-  const linearGradients = [
-    "linear-gradient(to bottom right, var(--cyan-500), var(--emerald-500))",
-    "linear-gradient(to bottom right, var(--pink-500), var(--indigo-500))",
-    "linear-gradient(to bottom right, var(--orange-500), var(--yellow-500))",
-  ]
 
   return (
     <motion.div
-      whileInView={{
-        backgroundColor: backgroundColors[activeCard % backgroundColors.length],
-      }}
       className="flex justify-center items-start relative space-x-10"
-      //ref={elementRef}
     >
+      <motion.div
+        className="lg:block rounded-md bg-white sticky overflow-hidden"
+        style={{
+          top: '50%',
+          transform: 'translateY(-50%)',
+          height: '75vh',
+          width: '500px'
+        }}
+      >
+        {content.map(({ src }, index) => (
+          <motion.img
+            className='image'
+            src={src}
+            key={index}
+            initial={{
+              opacity: 0,
+              zIndex: -1
+            }}
+            animate={{
+              opacity: activeCard === index ? 1 : 0,
+              zIndex: activeCard === index ? 1 : -1,
+            }}
+          />
+        ))}
+        {/*{content[activeCard].content ?? null}*/}
+      </motion.div>
       <div className="div relative flex items-start px-4">
-        <div className="max-w-2xl" style={{ paddingBottom: '240px', paddingTop: '240px' }}>
+        <div className="max-w-2xl" style={{ paddingBottom: '100px', paddingTop: '100px' }}>
           {content.map(({ title, description }, index) => (
-            <div key={title + index} className="my-20" style={{ minHeight: '50vh' }}>
+            <div key={title + index} className="my-20">
               <motion.h2
                 initial={{
                   opacity: 0,
                 }}
                 animate={{
-                  opacity: activeCard === index ? 1 : 0.1,
+                  opacity: activeCard === index ? 1 : 0.3,
                 }}
-                className="text-2xl font-bold text-slate-100"
+                className="text-2xl font-bold"
               >
                 {title}
               </motion.h2>
@@ -74,9 +95,9 @@ export const StickyScroll = ({
                   opacity: 0,
                 }}
                 animate={{
-                  opacity: activeCard === index ? 1 : 0.1,
+                  opacity: activeCard === index ? 1 : 0.3,
                 }}
-                className="text-kg text-slate-300 max-w-sm mt-10"
+                className="text-kg max-w-sm mt-10"
               >
                 {description}
               </motion.p>
@@ -84,16 +105,6 @@ export const StickyScroll = ({
           ))}
         </div>
       </div>
-      <motion.div
-        animate={{
-          background: linearGradients[activeCard % linearGradients.length],
-        }}
-        className="lg:block h-60 w-80 rounded-md bg-white sticky overflow-hidden"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)'
-        }}
-      ></motion.div>
     </motion.div>
   )
 }
